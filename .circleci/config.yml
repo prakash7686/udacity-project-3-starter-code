@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.10.1
 
 jobs:
   build-frontend:
@@ -90,6 +92,13 @@ jobs:
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
+  example-job:
+    docker:
+      # replace with your preferred image
+      - image: cimg/base:stable
+    steps:
+      - slack/notify:
+          event: fail 
 
 workflows:
   default:
@@ -104,3 +113,4 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
+      - example-job
