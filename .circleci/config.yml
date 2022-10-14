@@ -20,7 +20,6 @@ jobs:
           key: frontend-build
       - slack/notify:
           event: fail
-          template: basic_success_1
 
   build-backend:
     docker:
@@ -40,7 +39,6 @@ jobs:
           key: backend-build
       - slack/notify:
           event: fail
-          template: basic_success_1
 
   test-frontend:
     docker:
