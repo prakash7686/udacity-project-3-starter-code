@@ -40,8 +40,7 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
       - slack/notify:
-          event: fail
-          template: basic_fail_1
+          event: always
 
   test-frontend:
     docker:
@@ -57,8 +56,7 @@ jobs:
             npm install
             npm run test
       - slack/notify:
-          event: fail
-          template: basic_fail_1
+          event: always
 
   test-backend:
     docker:
@@ -89,7 +87,7 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm audit --audit-level=critical
+            npm audit --audit-level=critical --force
       - slack/notify:
           event: fail
           template: basic_fail_1
