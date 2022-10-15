@@ -171,38 +171,39 @@ jobs:
           event: fail
           template: basic_fail_1
 
-      configure-infrastructure:
-        docker:
-          # Docker image here that supports Ansible
-          - image: python:3.7-alpine3.11
-        steps:
-          # Checkout code from git
-          - checkout
-          # Add ssh keys with fingerprint
-          - add_ssh_keys:
-              fingerprints: ["b8:1c:c2:60:87:54:0e:21:81:5a:39:4f:12:0d:1d:69"]
-          # attach workspace
-          - attach_workspace:
-              at: .
-          - run:
-              name: Install dependencies
-              command: |
-                # Your code here
-                apk add --update ansible
-                apk add curl
-                apk add openssh-client
-                pip install awscli
-          - run:
-              name: Configure server
-              command: |
-                # Your code here
-                cat .circleci/ansible/inventory.txt
-                ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-          # Here's where you will add some code to rollback on failure
-          - destroy-environment
-          - slack/notify:
-              event: fail
-              template: basic_fail_1
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      - image: python:3.7-alpine3.11
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["b8:1c:c2:60:87:54:0e:21:81:5a:39:4f:12:0d:1d:69"]
+      # attach workspace
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          command: |
+            # Your code here
+            apk add --update ansible
+            apk add curl
+            apk add openssh-client
+            pip install awscli
+      - run:
+          name: Configure server
+          command: |
+            # Your code here
+            cat .circleci/ansible/inventory.txt
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+      # Here's where you will add some code to rollback on failure
+      - destroy-environment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+
 workflows:
   default:
     jobs:
