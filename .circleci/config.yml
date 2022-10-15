@@ -229,4 +229,4 @@ workflows:
           context: CI_SLACK
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-          context: UDAPEOPLE_SLACK
+          context: CI_SLACK
