@@ -279,5 +279,5 @@ workflows:
       - configure-infrastructure:
           requires: [deploy-infrastructure]
           context: CI_SLACK
-      - run-migrations
+      - run-migrations:
           requires: [configure-infrastructure]
