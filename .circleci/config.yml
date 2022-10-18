@@ -314,9 +314,9 @@ workflows:
 #      - configure-infrastructure
 #          requires: [deploy-infrastructure]
 #          context: CI_SLACK
-      - run-migrations:
-          requires: [configure-infrastructure]
+#      - run-migrations:
+#          requires: [configure-infrastructure]
 #          context: CI_SLACK
-      - deploy-frontend:
-          requires: [run-migrations]
+#      - deploy-frontend:
+#          requires: [run-migrations]
 #          context: CI_SLACK
