@@ -267,7 +267,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-cd3fbc0" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
             export BACKEND_IP=$(aws ec2 describe-instances...............)
             echo "BACKEND_IP = ${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
@@ -281,7 +281,7 @@ jobs:
               npm install
               npm run build
               tar -czvf artifact-0824383.tar.gz dist
-              aws s3 cp dist s3://udapeople-cd3fbc0 --recursive
+              aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure
 #     - destroy-environment
       - slack/notify:
@@ -291,28 +291,28 @@ jobs:
 workflows:
   default:
     jobs:
-#      - build-frontend
-#      - build-backend
-#      - test-frontend:
-#          requires: [build-frontend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
 #          context: CI_SLACK
-#      - test-backend:
-#          requires: [build-backend]
+      - test-backend:
+          requires: [build-backend]
 #          context: CI_SLACK
-#      - scan-backend:
-#          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
 #          context: CI_SLACK
-#      - scan-frontend:
-#          requires: [build-frontend]
+      - scan-frontend:
+          requires: [build-frontend]
 #          context: CI_SLACK
-#      - deploy-infrastructure:
-#          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#          filters:
-#            branches:
-#              only: [master]
-#          context: CI_SLACK
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [dev-branch]
+          context: CI_SLACK
       - configure-infrastructure
-#          requires: [deploy-infrastructure]
+          requires: [deploy-infrastructure]
 #          context: CI_SLACK
       - run-migrations:
           requires: [configure-infrastructure]
