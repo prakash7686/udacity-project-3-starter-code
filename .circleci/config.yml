@@ -251,6 +251,43 @@ jobs:
           event: fail
           template: basic_fail_1
 
+  deploy-frontend:
+    docker:
+      # Docker image here that supports AWS CLI
+      - image: amazon/aws-cli
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            yum -y install python3
+            curl -sL https://rpm.nodesource.com/setup_16.x | bash -
+            yum -y install nodejs tar gzip
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-0824383" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances...............)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+
+      # Here's where you will add some code to rollback on failure
+      #     - destroy-environment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+
 workflows:
   default:
     jobs:
@@ -268,15 +305,18 @@ workflows:
 #      - scan-frontend:
 #          requires: [build-frontend]
 #          context: CI_SLACK
-      - deploy-infrastructure:
+#      - deploy-infrastructure:
 #          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
-          context: CI_SLACK
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-          context: CI_SLACK
-      - run-migrations:
-          requires: [configure-infrastructure]
-          context: CI_SLACK
+#          filters:
+#            branches:
+#              only: [master]
+#          context: CI_SLACK
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+#          context: CI_SLACK
+#      - run-migrations:
+#          requires: [configure-infrastructure]
+#          context: CI_SLACK
+      - deploy-frontend:
+#          requires: [run-migrations]
+#          context: CI_SLACK
