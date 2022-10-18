@@ -187,7 +187,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # Your code here
             apk add --update ansible
             apk add curl
             apk add openssh-client
@@ -199,10 +198,11 @@ jobs:
             cat .circleci/ansible/inventory.txt
             ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       # Here's where you will add some code to rollback on failure
-      - destroy-environment
+#      - destroy-environment
       - slack/notify:
           event: fail
           template: basic_fail_1
+
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
@@ -245,8 +245,8 @@ jobs:
               echo 'Migration failed'
               curl https://kvdb.io/7wdw3cvuAaQ77aYPkNJ1R7/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '0'
             fi
-
       # Here's where you will add some code to rollback on failure
+#      - destroy-environment
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -263,7 +263,7 @@ jobs:
           command: |
             yum -y install python3
             curl -sL https://rpm.nodesource.com/setup_16.x | bash -
-            yum -y install nodejs
+            yum -y install nodejs tar
       - run:
           name: Get backend url
           command: |
@@ -281,6 +281,11 @@ jobs:
               npm run build
               tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
               aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      # Here's where you will add some code to rollback on failure
+#      - destroy-environment
+      - slack/notify:
+        event: fail
+        template: basic_fail_1
 
 workflows:
   default:
@@ -310,6 +315,8 @@ workflows:
           context: CI_SLACK
       - run-migrations:
           requires: [configure-infrastructure]
+          context: CI_SLACK
       - deploy-frontend:
           requires: [run-migrations]
+          context: CI_SLACK
 
