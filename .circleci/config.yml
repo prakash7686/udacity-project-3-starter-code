@@ -311,7 +311,7 @@ workflows:
 #            branches:
 #              only: [master]
 #          context: CI_SLACK
-      - configure-infrastructure:
+      - configure-infrastructure
 #          requires: [deploy-infrastructure]
 #          context: CI_SLACK
       - run-migrations:
