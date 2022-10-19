@@ -187,7 +187,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml add --update ansible
             apk add curl
             apk add openssh-client
             pip install awscli
@@ -267,7 +267,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-bb57bc3" --output text)
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
             echo "BACKEND_IP = ${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
@@ -279,43 +279,88 @@ jobs:
               cd frontend
               npm install
               npm run build
-              tar -czvf artifact-bb57bc3.tar.gz dist
-              aws s3 cp dist s3://udapeople-bb57bc3 --recursive
+              tar -czvf artifact-${CIRCLE_WORKFLOW_ID:0:7}.tar.gz dist
+              aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure
 #     - destroy-environment
       - slack/notify:
          event: fail
          template: basic_fail_1
 
+  deploy-backend:
+    docker:
+      # Docker image here that supports Ansible
+      - image: python:3.7-alpine3.11
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["1a:cc:6a:c7:af:6f:e8:58:b7:3c:3b:70:b1:da:41:19"]
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          command: |
+            # Your code here
+            apk add --update ansible
+            apk add curl
+            apk add openssh-client nodejs npm
+            pip install awscli
+            npm install
+      - run:
+          name: Deploy backend
+          command: |
+            # your code here
+            cd backend
+            npm i
+            npm run build
+            cp package* ./dist
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+            # Here's where you will add some code to rollback on failure  
+#     - destroy-environment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+
 workflows:
   default:
     jobs:
-#      - build-frontend
-#      - build-backend
-#      - test-frontend:
-#          requires: [build-frontend]
-#          context: CI_SLACK
-#      - test-backend:
-#          requires: [build-backend]
-#          context: CI_SLACK
-#      - scan-backend:
-#          requires: [build-backend]
-#          context: CI_SLACK
-#      - scan-frontend:
-#          requires: [build-frontend]
-#          context: CI_SLACK
-#      - deploy-infrastructure:
-#          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#          filters:
-#            branches:
-#              only: [dev-branch]
-#          context: CI_SLACK
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#          context: CI_SLACK
-#      - run-migrations:
-#          requires: [configure-infrastructure]
-#          context: CI_SLACK
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+          context: CI_SLACK
+      - test-backend:
+          requires: [build-backend]
+          context: CI_SLACK
+      - scan-backend:
+          requires: [build-backend]
+          context: CI_SLACK
+      - scan-frontend:
+          requires: [build-frontend]
+          context: CI_SLACK
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [dev-branch]
+          context: CI_SLACK
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+          context: CI_SLACK
+      - run-migrations:
+          requires: [configure-infrastructure]
+          context: CI_SLACK
       - deploy-frontend
-#          requires: [run-migrations]
-#          context: CI_SLACK
+          requires: [run-migrations]
+          context: CI_SLACK

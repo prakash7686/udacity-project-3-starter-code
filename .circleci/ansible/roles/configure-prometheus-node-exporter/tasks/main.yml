@@ -1,27 +1,52 @@
-- name: "install node exporter."
-  unarchive:
-    src: https://github.com/prometheus/node_exporter/releases/download/v0.17.0/node_exporter-0.17.0.linux-amd64.tar.gz
-    dest: /tmp
-    remote_src: yes
+---
+- name: "upgrade packages."
+  become: true
+  apt:
+    upgrade: "yes"
 
-- name: "move binary to /usr/local/bin."
+- name: "install dependencies."
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: "Create Directory"
+  become: true
+  file:
+    path: ~/Udapeople7686
+    state: directory
+
+- name: "Copy Artifact"
   become: true
   copy:
-    src: /tmp/node_exporter-0.17.0.linux-amd64/node_exporter
-    dest: /usr/local/bin/node_exporter
-    remote_src: yes
-    mode: '0777'
-    
-- name: "add node exporter configuration."
-  become: true
-  copy:
-    src: node_exporter.service
-    dest: /etc/systemd/system/
+    src: ~/project/artifact.tar.gz
+    dest: ~/Udapeople7686/artifact.tar.gz
 
-- name: "enable node_exporter service"
+- name: "Extract Artifact"
   become: true
-  systemd:
-    state: restarted
-    daemon_reload: yes
-    name: node_exporter
-    enabled: yes
+  shell: |
+    cd ~/Udapeople7686
+    tar -vxf artifact.tar.gz
+    rm -f artifact.tar.gz
+
+- name: "Install NPM"
+  become: true
+  shell:
+    cd ~/Udapeople7686
+    npm install
+
+- name: "Start Application"
+  become: true
+  shell:
+    cd ~/Udapeople7686
+    pm2 start npm -- run start
+    sleep 90
