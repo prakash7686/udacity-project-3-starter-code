@@ -316,9 +316,6 @@ jobs:
             npm i
             npm run build
             cp package* ./dist
-            cd backend
-            npm i
-            npm run build
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
