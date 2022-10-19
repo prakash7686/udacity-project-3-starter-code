@@ -361,6 +361,6 @@ workflows:
       - run-migrations:
           requires: [configure-infrastructure]
           context: CI_SLACK
-      - deploy-frontend
+      - deploy-frontend:
           requires: [run-migrations]
           context: CI_SLACK
