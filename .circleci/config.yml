@@ -349,9 +349,9 @@ jobs:
             export API_URL="http://${BACKEND_IP}:3030"
             sleep 30
             echo "${API_URL}"
-            export CURL_STATUS=$(curl -s "${API_URL}/api/status")
+            export CURL_STATUS=$(curl "${API_URL}/api/status")
             echo "${CURL_STATUS}"
-            if curl -s "${API_URL}/api/status" | grep "ok"
+            if curl  "${API_URL}/api/status" | grep "ok"
             then
               exit 0
             else
