@@ -345,9 +345,12 @@ jobs:
           command: |
             # your code here
             export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
+            echo "${BACKEND_IP}"
             export API_URL="http://${BACKEND_IP}:3030"
-            sleep 120
+            sleep 30
             echo "${API_URL}"
+            export CURL_STATUS=$(curl -s "${API_URL}/api/status")
+            echo "${CURL_STATUS}"
             if curl -s "${API_URL}/api/status" | grep "ok"
             then
               exit 0
