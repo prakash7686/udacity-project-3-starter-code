@@ -364,3 +364,6 @@ workflows:
       - deploy-frontend:
           requires: [run-migrations]
           context: CI_SLACK
+      - deploy-backend:
+          requires: [ run-migrations ]
+          context: CI_SLACK
