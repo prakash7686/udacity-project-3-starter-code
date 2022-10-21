@@ -341,7 +341,8 @@ jobs:
           command: |
             # your code here
             yum install -y curl
-            apk add openssh-client nodejs npm
+            sudo apt install nodejs
+            sudo apt install npm
 
       - run:
           name: Backend Smoke Test
