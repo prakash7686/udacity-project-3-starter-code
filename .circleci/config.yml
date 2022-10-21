@@ -332,7 +332,7 @@ jobs:
   smoke-test:
     docker:
       # Lightweight Docker image
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       # Checkout code from git
       - checkout
@@ -341,7 +341,11 @@ jobs:
           command: |
             # your code here
             yum install -y curl
-            npm install           
+            apk add --update ansible
+            apk add curl
+            apk add openssh-client nodejs npm
+            pip install awscli
+            npm install      
 
       - run:
           name: Backend Smoke Test
