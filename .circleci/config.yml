@@ -342,7 +342,6 @@ jobs:
             # your code here
             yum install -y curl
             apk add --update ansible
-            apk add curl
             apk add openssh-client nodejs npm
             pip install awscli
             npm install      
