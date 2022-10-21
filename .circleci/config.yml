@@ -341,8 +341,7 @@ jobs:
           command: |
             # your code here
             yum install -y curl
-            sudo apt install nodejs
-            sudo apt install npm
+            npm install           
 
       - run:
           name: Backend Smoke Test
