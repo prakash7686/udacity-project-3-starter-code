@@ -340,7 +340,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            yum install -y curl
+            apk add curl
             apk add --update ansible
             apk add openssh-client nodejs npm
             pip install awscli
