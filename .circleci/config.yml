@@ -371,7 +371,7 @@ jobs:
               exit 1
             fi
       # Here's where you will add some code to rollback on failure
-      - destroy-environment
+#      - destroy-environment
       - slack/notify:
           event: fail
           template: basic_fail_1
